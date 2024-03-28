@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, reactive } from "vue";
 import { graphic } from "echarts/core";
-import { currentGET } from "@/api";
+import { countUserNum } from "@/api";
+import {ElMessage} from "element-plus"
 
 let colors = ["#0BFC7F", "#A0A0A0", "#F48C02", "#F4023C"];
 const option = ref({});
@@ -19,8 +20,8 @@ const echartsGraphic = (colors: string[]) => {
   ]);
 };
 const getData = () => {
-  currentGET("leftCenter").then((res) => {
-    console.log(res);
+  countUserNum().then((res) => {
+    console.log("左中--用户总览",res);
     if (res.success) {
       state.lockNum = res.data.lockNum;
       state.offlineNum = res.data.offlineNum;
@@ -28,7 +29,11 @@ const getData = () => {
       state.totalNum = res.data.totalNum;
       state.alarmNum = res.data.alarmNum;
       setOption();
+    }else{
+      ElMessage.error(res.msg)
     }
+  }).catch(err=>{
+    ElMessage.error(err)
   });
 };
 getData();

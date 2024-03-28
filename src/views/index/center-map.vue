@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { ref, reactive, nextTick } from "vue";
-import { currentGET, GETNOBASE } from "@/api";
+import { centerMap, GETNOBASE } from "@/api";
 import { registerMap, getMap } from "echarts/core";
 import { optionHandle, regionCodes } from "./center.map";
 import BorderBox13 from "@/components/datav/border-box-13";
+import { ElMessage } from "element-plus";
+
 import type { MapdataType } from "./center.map";
+
 const option = ref({});
 const code = ref("china"); //china 代表中国 其他地市是行政编码
 
@@ -24,8 +27,7 @@ const dataSetHandle = async (regionCode: string, list: object[]) => {
   let mapData: MapdataType[] = [];
   //获取当前地图每块行政区中心点
   geojson.features.forEach((element: any) => {
-    cityCenter[element.properties.name] =
-      element.properties.centroid || element.properties.center;
+    cityCenter[element.properties.name] = element.properties.centroid || element.properties.center;
   });
   //当前中心点如果有此条数据中心点则赋值x，y当然这个x,y也可以后端返回进行大点，前端省去多行代码
   list.forEach((item: any) => {
@@ -42,12 +44,18 @@ const dataSetHandle = async (regionCode: string, list: object[]) => {
 };
 
 const getData = async (regionCode: string) => {
-  currentGET("centerMap", { regionCode: regionCode }).then((res) => {
-    console.log("设备分布", res);
-    if (res.success) {
-      dataSetHandle(res.data.regionCode, res.data.dataList);
-    }
-  });
+  centerMap({ regionCode: regionCode })
+    .then((res) => {
+      console.log("中上--设备分布", res);
+      if (res.success) {
+        dataSetHandle(res.data.regionCode, res.data.dataList);
+      } else {
+        ElMessage.error(res.msg);
+      }
+    })
+    .catch((err) => {
+      ElMessage.error(err);
+    });
 };
 const getGeojson = (regionCode: string) => {
   return new Promise<boolean>(async (resolve) => {
@@ -56,9 +64,7 @@ const getGeojson = (regionCode: string) => {
       mapjson = mapjson.geoJSON;
       resolve(mapjson);
     } else {
-      mapjson = await GETNOBASE(`./map-geojson/${regionCode}.json`).then(
-        (data) => data
-      );
+      mapjson = await GETNOBASE(`./map-geojson/${regionCode}.json`).then((data) => data);
       code.value = regionCode;
       registerMap(regionCode, {
         geoJSON: mapjson as any,
@@ -71,7 +77,7 @@ const getGeojson = (regionCode: string) => {
 getData(code.value);
 
 const mapClick = (params: any) => {
-  console.log(params);
+  // console.log(params);
   let xzqData = regionCodes[params.name];
   if (xzqData) {
     getData(xzqData.adcode);
@@ -90,9 +96,7 @@ const mapClick = (params: any) => {
     </div>
     <div class="mapwrap">
       <BorderBox13>
-        <div class="quanguo" @click="getData('china')" v-if="code !== 'china'">
-          中国
-        </div>
+        <div class="quanguo" @click="getData('china')" v-if="code !== 'china'">中国</div>
         <v-chart
           class="chart"
           :option="option"
@@ -120,12 +124,7 @@ const mapClick = (params: any) => {
       font-size: 28px;
       font-weight: 900;
       letter-spacing: 6px;
-      background: linear-gradient(
-        92deg,
-        #0072ff 0%,
-        #00eaff 48.8525390625%,
-        #01aaff 100%
-      );
+      background: linear-gradient(92deg, #0072ff 0%, #00eaff 48.8525390625%, #01aaff 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       margin: 0 10px;
@@ -158,7 +157,7 @@ const mapClick = (params: any) => {
     .quanguo {
       position: absolute;
       right: 20px;
-        top: -46px;
+      top: -46px;
       width: 80px;
       height: 28px;
       border: 1px solid #00eded;
@@ -168,8 +167,7 @@ const mapClick = (params: any) => {
       line-height: 26px;
       letter-spacing: 6px;
       cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0, 237, 237, 0.5),
-        0 0 6px rgba(0, 237, 237, 0.4);
+      box-shadow: 0 2px 4px rgba(0, 237, 237, 0.5), 0 0 6px rgba(0, 237, 237, 0.4);
       z-index: 10;
     }
   }

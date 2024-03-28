@@ -1,25 +1,32 @@
 <script setup lang="ts">
 import { reactive, ref } from "vue";
-import { currentGET } from "@/api";
+import { countDeviceNum } from "@/api";
 import CountUp from "@/components/count-up";
+import {ElMessage} from "element-plus"
+
 const duration = ref(2);
 const state = reactive({
-  alarmNum: 759,
-  offlineNum: 44,
-  onlineNum: 654,
-  totalNum: 698,
+  alarmNum: 0,
+  offlineNum: 0,
+  onlineNum: 0,
+  totalNum: 0,
 });
 
+
 const getData = () => {
-  currentGET("leftTop").then((res) => {
-    console.log(res);
+  countDeviceNum().then((res) => {
+    console.log("左上--设备总览",res);
     if (res.success) {
       state.alarmNum = res.data.alarmNum;
       state.offlineNum = res.data.offlineNum;
       state.onlineNum = res.data.onlineNum;
       state.totalNum = res.data.totalNum;
+    }else{
+      ElMessage.error(res.msg)
     }
-  });
+  }).catch(err=>{
+    ElMessage.error(err)
+  });;
 };
 getData();
 </script>

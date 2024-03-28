@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { currentGET } from "@/api";
+import { leftBottom } from "@/api";
 import SeamlessScroll from "@/components/seamless-scroll";
 import { computed, onMounted, reactive } from "vue";
 import { useSettingStore } from "@/stores";
 import { storeToRefs } from "pinia";
-import EmptyCom from "@/components/empty-com"
+import EmptyCom from "@/components/empty-com";
+import { ElMessage } from "element-plus";
+
 const settingStore = useSettingStore();
-const { defaultOption,indexConfig } = storeToRefs(settingStore);
+const { defaultOption, indexConfig } = storeToRefs(settingStore);
 const state = reactive<any>({
   list: [],
   defaultOption: {
@@ -18,17 +20,21 @@ const state = reactive<any>({
 });
 
 const getData = () => {
-  currentGET("leftBottom", { limitNum: 20 }).then((res) => {
-    console.log("设备提醒", res);
-    if (res.success) {
-      state.list = res.data.list;
-    } else {
-      window.$message({
-        text: res.msg,
-        type: "warning",
-      });
-    }
-  });
+  leftBottom( { limitNum: 20 })
+    .then((res) => {
+      console.log("左下--设备提醒", res);
+      if (res.success) {
+        state.list = res.data.list;
+      } else {
+        ElMessage({
+          message: res.msg,
+          type: "warning",
+        });
+      }
+    })
+    .catch((err) => {
+      ElMessage.error(err);
+    });
 };
 const addressHandle = (item: any) => {
   let name = item.provinceName;
@@ -40,22 +46,22 @@ const addressHandle = (item: any) => {
   }
   return name;
 };
-const comName = computed(()=>{
-    if(indexConfig.value.leftBottomSwiper){
-        return SeamlessScroll
-    }else{
-        return EmptyCom
-    }
-})
+const comName = computed(() => {
+  if (indexConfig.value.leftBottomSwiper) {
+    return SeamlessScroll;
+  } else {
+    return EmptyCom;
+  }
+});
 onMounted(() => {
   getData();
 });
 </script>
 
 <template>
-  <div class="left_boottom_wrap beautify-scroll-def"  :class="{ 'overflow-y-auto': !indexConfig.leftBottomSwiper }">
+  <div class="left_boottom_wrap beautify-scroll-def" :class="{ 'overflow-y-auto': !indexConfig.leftBottomSwiper }">
     <component
-     :is="comName"
+      :is="comName"
       :list="state.list"
       v-model="state.scroll"
       :singleHeight="state.defaultOption.singleHeight"
@@ -73,15 +79,11 @@ onMounted(() => {
             <div class="flex">
               <div class="info">
                 <span class="labels">设备ID：</span>
-                <span class="text-content zhuyao doudong wangguan">
-                  {{ item.gatewayno }}</span
-                >
+                <span class="text-content zhuyao doudong wangguan"> {{ item.gatewayno }}</span>
               </div>
               <div class="info">
                 <span class="labels">时间：</span>
-                <span class="text-content" style="font-size: 12px">
-                  {{ item.createTime }}</span
-                >
+                <span class="text-content" style="font-size: 12px"> {{ item.createTime }}</span>
               </div>
             </div>
 
@@ -96,9 +98,7 @@ onMounted(() => {
 
             <div class="info addresswrap">
               <span class="labels">地址：</span>
-              <span class="text-content ciyao" style="font-size: 12px">
-                {{ addressHandle(item) }}</span
-              >
+              <span class="text-content ciyao" style="font-size: 12px"> {{ addressHandle(item) }}</span>
             </div>
           </div>
         </li>

@@ -1,22 +1,28 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, nextTick } from "vue";
-import { currentGET } from "@/api";
-import {graphic} from "echarts/core"
+import { installationPlan } from "@/api";
+import { graphic } from "echarts/core";
+import { ElMessage } from "element-plus";
+
 const option = ref({});
 const getData = () => {
-  currentGET("centerBottom", {}).then((res) => {
-    console.log("安装计划", res);
-    if (res.success) {
-      setOption(res.data);
-    } else {
-      window["$message"]({
-        text: res.msg,
-        type: "warning",
-      });
-    }
-  });
+  installationPlan()
+    .then((res) => {
+      console.log("中下--安装计划", res);
+      if (res.success) {
+        setOption(res.data);
+      } else {
+        ElMessage({
+          message: res.msg,
+          type: "warning",
+        });
+      }
+    })
+    .catch((err) => {
+      ElMessage.error(err);
+    });
 };
-const setOption =async (newData: any) => {
+const setOption = async (newData: any) => {
   option.value = {
     tooltip: {
       trigger: "axis",
@@ -31,21 +37,9 @@ const setOption =async (newData: any) => {
         params.forEach(function (item: any) {
           if (item.value) {
             if (item.seriesName == "安装率") {
-              result +=
-                item.marker +
-                " " +
-                item.seriesName +
-                " : " +
-                item.value +
-                "%</br>";
+              result += item.marker + " " + item.seriesName + " : " + item.value + "%</br>";
             } else {
-              result +=
-                item.marker +
-                " " +
-                item.seriesName +
-                " : " +
-                item.value +
-                "个</br>";
+              result += item.marker + " " + item.seriesName + " : " + item.value + "个</br>";
             }
           } else {
             result += item.marker + " " + item.seriesName + " :  - </br>";
@@ -149,14 +143,13 @@ const setOption =async (newData: any) => {
     ],
   };
 };
-onMounted(()=>{
-getData();
-
-})
+onMounted(() => {
+  getData();
+});
 </script>
 
 <template>
-  <v-chart class="chart" :option="option" v-if="JSON.stringify(option)!='{}'"/>
+  <v-chart class="chart" :option="option" v-if="JSON.stringify(option) != '{}'" />
 </template>
 
 <style scoped lang="scss"></style>
