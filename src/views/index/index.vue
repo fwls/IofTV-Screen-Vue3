@@ -20,7 +20,7 @@ import RightBottom from "./right-bottom.vue";
       <ItemWrap class="contetn_left-top contetn_lr-item" title="设备总览">
         <LeftTop />
       </ItemWrap>
-      <!-- <ItemWrap class="contetn_left-center contetn_lr-item" title="用户总览">
+      <ItemWrap class="contetn_left-center contetn_lr-item" title="用户总览">
         <LeftCenter />
       </ItemWrap>
       <ItemWrap
@@ -29,9 +29,9 @@ import RightBottom from "./right-bottom.vue";
         style="padding: 0 10px 16px 10px"
       >
         <LeftBottom />
-      </ItemWrap> -->
+      </ItemWrap>
     </div>
-    <!-- <div class="contetn_center">
+    <div class="contetn_center">
       <CenterMap class="contetn_center_top" title="设备分布图" />
       <ItemWrap class="contetn_center-bottom" title="安装计划">
         <CenterBottom />
@@ -51,7 +51,7 @@ import RightBottom from "./right-bottom.vue";
       <ItemWrap class="contetn_left-bottom contetn_lr-item" title="数据统计图 ">
         <RightBottom />
       </ItemWrap>
-    </div> -->
+    </div>
   </div>
 </template>
 
