@@ -3,9 +3,15 @@ import { leftBottom } from "@/api";
 import SeamlessScroll from "@/components/seamless-scroll";
 import { computed, onMounted, reactive } from "vue";
 import { useSettingStore } from "@/stores";
-import { storeToRefs } from "pinia";
+
 import EmptyCom from "@/components/empty-com";
 import { ElMessage } from "element-plus";
+import { useIndexStore } from "@/stores/indexStore";
+import { storeToRefs } from 'pinia'
+
+const indexStore = useIndexStore();
+const { deviceAlarmList } = storeToRefs(indexStore);
+
 
 const settingStore = useSettingStore();
 const { defaultOption, indexConfig } = storeToRefs(settingStore);
@@ -19,23 +25,6 @@ const state = reactive<any>({
   scroll: true,
 });
 
-const getData = () => {
-  leftBottom( { limitNum: 20 })
-    .then((res) => {
-      console.log("左下--设备提醒", res);
-      if (res.success) {
-        state.list = res.data.list;
-      } else {
-        ElMessage({
-          message: res.msg,
-          type: "warning",
-        });
-      }
-    })
-    .catch((err) => {
-      ElMessage.error(err);
-    });
-};
 const addressHandle = (item: any) => {
   let name = item.provinceName;
   if (item.cityName) {
@@ -53,16 +42,14 @@ const comName = computed(() => {
     return EmptyCom;
   }
 });
-onMounted(() => {
-  getData();
-});
+
 </script>
 
 <template>
   <div class="left_boottom_wrap beautify-scroll-def" :class="{ 'overflow-y-auto': !indexConfig.leftBottomSwiper }">
     <component
       :is="comName"
-      :list="state.list"
+      :list="deviceAlarmList"
       v-model="state.scroll"
       :singleHeight="state.defaultOption.singleHeight"
       :step="state.defaultOption.step"
@@ -72,7 +59,7 @@ onMounted(() => {
       :wheel="state.defaultOption.wheel"
     >
       <ul class="left_boottom">
-        <li class="left_boottom_item" v-for="(item, i) in state.list" :key="i">
+        <li class="left_boottom_item" v-for="(item, i) in deviceAlarmList" :key="i">
           <span class="orderNum doudong">{{ i + 1 }}</span>
           <div class="inner_right">
             <div class="dibu"></div>

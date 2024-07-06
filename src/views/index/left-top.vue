@@ -1,59 +1,41 @@
 <script setup lang="ts">
 import { reactive, ref } from "vue";
-import { countDeviceNum } from "@/api";
+import { countDeviceNum1 } from "@/api";
 import CountUp from "@/components/count-up";
-import {ElMessage} from "element-plus"
+import { ElMessage } from "element-plus"
+import { useIndexStore } from "@/stores/indexStore";
+import { storeToRefs } from 'pinia'
 
+const indexStore = useIndexStore();
 const duration = ref(2);
-const state = reactive({
-  alarmNum: 0,
-  offlineNum: 0,
-  onlineNum: 0,
-  totalNum: 0,
-});
 
+const { deviceNum } = storeToRefs(indexStore);
 
-const getData = () => {
-  countDeviceNum().then((res) => {
-    console.log("左上--设备总览",res);
-    if (res.success) {
-      state.alarmNum = res.data.alarmNum;
-      state.offlineNum = res.data.offlineNum;
-      state.onlineNum = res.data.onlineNum;
-      state.totalNum = res.data.totalNum;
-    }else{
-      ElMessage.error(res.msg)
-    }
-  }).catch(err=>{
-    ElMessage.error(err)
-  });;
-};
-getData();
 </script>
 
 <template>
   <ul class="user_Overview flex">
     <li class="user_Overview-item" style="color: #00fdfa">
       <div class="user_Overview_nums allnum">
-        <CountUp :endVal="state.totalNum" :duration="duration" />
+        <CountUp :endVal="deviceNum.totalNum" :duration="duration" />
       </div>
       <p>总设备数</p>
     </li>
     <li class="user_Overview-item" style="color: #07f7a8">
       <div class="user_Overview_nums online">
-        <CountUp :endVal="state.onlineNum" :duration="duration" />
+        <CountUp :endVal="deviceNum.onlineNum" :duration="duration" />
       </div>
       <p>在线数</p>
     </li>
     <li class="user_Overview-item" style="color: #e3b337">
       <div class="user_Overview_nums offline">
-        <CountUp :endVal="state.offlineNum" :duration="duration" />
+        <CountUp :endVal="deviceNum.offlineNum" :duration="duration" />
       </div>
       <p>掉线数</p>
     </li>
     <li class="user_Overview-item" style="color: #f5023d">
       <div class="user_Overview_nums laramnum">
-        <CountUp :endVal="state.alarmNum" :duration="duration" />
+        <CountUp :endVal="deviceNum.alarmNum" :duration="duration" />
       </div>
       <p>告警次数</p>
     </li>

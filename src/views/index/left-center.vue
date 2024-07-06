@@ -1,48 +1,38 @@
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import { ref, reactive, watch } from "vue";
 import { graphic } from "echarts/core";
 import { countUserNum } from "@/api";
-import {ElMessage} from "element-plus"
+import { ElMessage } from "element-plus"
+import { useIndexStore } from "@/stores/indexStore";
+import { storeToRefs } from 'pinia'
+
+const indexStore = useIndexStore();
+const duration = ref(2);
+
+const { userNum } = storeToRefs(indexStore);
 
 let colors = ["#0BFC7F", "#A0A0A0", "#F48C02", "#F4023C"];
 const option = ref({});
-const state = reactive({
-  lockNum: 0,
-  offlineNum: 0,
-  onlineNum: 0,
-  alarmNum: 0,
-  totalNum: 0,
-});
+
 const echartsGraphic = (colors: string[]) => {
   return new graphic.LinearGradient(1, 0, 0, 0, [
     { offset: 0, color: colors[0] },
     { offset: 1, color: colors[1] },
   ]);
 };
-const getData = () => {
-  countUserNum().then((res) => {
-    console.log("左中--用户总览",res);
-    if (res.success) {
-      state.lockNum = res.data.lockNum;
-      state.offlineNum = res.data.offlineNum;
-      state.onlineNum = res.data.onlineNum;
-      state.totalNum = res.data.totalNum;
-      state.alarmNum = res.data.alarmNum;
-      setOption();
-    }else{
-      ElMessage.error(res.msg)
-    }
-  }).catch(err=>{
-    ElMessage.error(err)
+
+watch(userNum,
+  () => {
+    userNum.value.totalNum = userNum.value.lockNum + userNum.value.offlineNum + userNum.value.onlineNum + userNum.value.alarmNum
+    setOption()
   });
-};
-getData();
+
 const setOption = () => {
   option.value = {
     title: {
       top: "center",
       left: "center",
-      text: [`{value|${state.totalNum}}`, "{name|总数}"].join("\n"),
+      text: [`{value|${userNum.value.totalNum}}`, "{name|总数}"].join("\n"),
       textStyle: {
         rich: {
           value: {
@@ -50,7 +40,7 @@ const setOption = () => {
             fontSize: 24,
             fontWeight: "bold",
             lineHeight: 20,
-            padding:[4,0,4,0]
+            padding: [4, 0, 4, 0]
           },
           name: {
             color: "#ffffff",
@@ -116,28 +106,28 @@ const setOption = () => {
         },
         data: [
           {
-            value: state.onlineNum,
+            value: userNum.value.onlineNum,
             name: "在线",
             itemStyle: {
               color: echartsGraphic(["#0BFC7F", "#A3FDE0"]),
             },
           },
           {
-            value: state.offlineNum,
+            value: userNum.value.offlineNum,
             name: "离线",
             itemStyle: {
               color: echartsGraphic(["#A0A0A0", "#DBDFDD"]),
             },
           },
           {
-            value: state.lockNum,
+            value: userNum.value.lockNum,
             name: "锁定",
             itemStyle: {
               color: echartsGraphic(["#F48C02", "#FDDB7D"]),
             },
           },
           {
-            value: state.alarmNum,
+            value: userNum.value.alarmNum,
             name: "异常",
             itemStyle: {
               color: echartsGraphic(["#F4023C", "#FB6CB7"]),

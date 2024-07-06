@@ -1,27 +1,19 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import { alarmNum } from "@/api";
+import { ref, onMounted, watch } from "vue";
 import { graphic } from "echarts/core";
 import { ElMessage } from "element-plus";
+import { useIndexStore } from "@/stores/indexStore";
+import { storeToRefs } from 'pinia'
+
+const indexStore = useIndexStore();
+const { alarmNum } = storeToRefs(indexStore);
 
 const option = ref({});
-const getData = () => {
-  alarmNum()
-    .then((res) => {
-      console.log("右上--报警次数 ", res);
-      if (res.success) {
-        setOption(res.data.dateList, res.data.numList, res.data.numList2);
-      } else {
-        ElMessage({
-          message: res.msg,
-          type: "warning",
-        });
-      }
-    })
-    .catch((err) => {
-      ElMessage.error(err);
-    });
-};
+
+watch(alarmNum, () => {
+  setOption(alarmNum.value.dateList, alarmNum.value.numList, alarmNum.value.numList2);
+});
+
 const setOption = async (xData: any[], yData: any[], yData2: any[]) => {
   option.value = {
     xAxis: {
@@ -220,9 +212,7 @@ const setOption = async (xData: any[], yData: any[], yData2: any[]) => {
     ],
   };
 };
-onMounted(() => {
-  getData();
-});
+
 </script>
 
 <template>

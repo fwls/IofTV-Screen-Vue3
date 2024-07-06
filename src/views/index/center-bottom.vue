@@ -1,27 +1,19 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, nextTick } from "vue";
-import { installationPlan } from "@/api";
+import { ref, reactive, watch, nextTick } from "vue";
 import { graphic } from "echarts/core";
 import { ElMessage } from "element-plus";
+import { useIndexStore } from "@/stores/indexStore";
+import { storeToRefs } from 'pinia'
+
+const indexStore = useIndexStore();
+const { installationPlan } = storeToRefs(indexStore);
 
 const option = ref({});
-const getData = () => {
-  installationPlan()
-    .then((res) => {
-      console.log("中下--安装计划", res);
-      if (res.success) {
-        setOption(res.data);
-      } else {
-        ElMessage({
-          message: res.msg,
-          type: "warning",
-        });
-      }
-    })
-    .catch((err) => {
-      ElMessage.error(err);
-    });
-};
+
+watch(installationPlan, (newData) => {
+  setOption(newData);
+});
+
 const setOption = async (newData: any) => {
   option.value = {
     tooltip: {
@@ -143,9 +135,7 @@ const setOption = async (newData: any) => {
     ],
   };
 };
-onMounted(() => {
-  getData();
-});
+
 </script>
 
 <template>

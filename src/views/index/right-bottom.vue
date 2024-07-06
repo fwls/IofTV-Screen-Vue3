@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { rightBottom } from "@/api";
 import SeamlessScroll from "@/components/seamless-scroll";
 import { computed, onMounted, reactive } from "vue";
 import { useSettingStore } from "@/stores";
-import { storeToRefs } from "pinia";
 import EmptyCom from "@/components/empty-com";
 import { ElMessage } from "element-plus";
+import { useIndexStore } from "@/stores/indexStore";
+import { storeToRefs } from 'pinia'
+
+const indexStore = useIndexStore();
+const { dataCountView } = storeToRefs(indexStore);
 
 const settingStore = useSettingStore();
 const { defaultOption, indexConfig } = storeToRefs(settingStore);
@@ -20,23 +23,6 @@ const state = reactive<any>({
   scroll: true,
 });
 
-const getData = () => {
-  rightBottom({ limitNum: 20 })
-    .then((res) => {
-      console.log("右下", res);
-      if (res.success) {
-        state.list = res.data.list;
-      } else {
-        ElMessage({
-          message: res.msg,
-          type: "warning",
-        });
-      }
-    })
-    .catch((err) => {
-      ElMessage.error(err);
-    });
-};
 
 const comName = computed(() => {
   if (indexConfig.value.rightBottomSwiper) {
@@ -52,26 +38,17 @@ function montionFilter(val: any) {
 const handleAddress = (item: any) => {
   return `${item.provinceName}/${item.cityName}/${item.countyName}`;
 };
-onMounted(() => {
-  getData();
-});
+
 </script>
 
 <template>
   <div class="right_bottom_wrap beautify-scroll-def" :class="{ 'overflow-y-auto': !indexConfig.rightBottomSwiper }">
-    <component
-      :is="comName"
-      :list="state.list"
-      v-model="state.scroll"
-      :singleHeight="state.defaultOption.singleHeight"
-      :step="state.defaultOption.step"
-      :limitScrollNum="state.defaultOption.limitScrollNum"
-      :hover="state.defaultOption.hover"
-      :singleWaitTime="state.defaultOption.singleWaitTime"
-      :wheel="state.defaultOption.wheel"
-    >
+    <component :is="comName" :list="dataCountView" v-model="state.scroll"
+      :singleHeight="state.defaultOption.singleHeight" :step="state.defaultOption.step"
+      :limitScrollNum="state.defaultOption.limitScrollNum" :hover="state.defaultOption.hover"
+      :singleWaitTime="state.defaultOption.singleWaitTime" :wheel="state.defaultOption.wheel">
       <ul class="right_bottom">
-        <li class="right_center_item" v-for="(item, i) in state.list" :key="i">
+        <li class="right_center_item" v-for="(item, i) in dataCountView" :key="i">
           <span class="orderNum">{{ i + 1 }}</span>
           <div class="inner_right">
             <div class="dibu"></div>
@@ -94,8 +71,7 @@ onMounted(() => {
               <div class="info">
                 <span class="labels shrink-0"> 地址：</span>
                 <span class="ciyao truncate" style="font-size: 12px; width: 220px" :title="handleAddress(item)">
-                  {{ handleAddress(item) }}</span
-                >
+                  {{ handleAddress(item) }}</span>
               </div>
               <div class="info time shrink-0">
                 <span class="labels">时间：</span>
@@ -106,8 +82,7 @@ onMounted(() => {
               <div class="info">
                 <span class="labels">报警内容：</span>
                 <span class="text-content ciyao" :class="{ warning: item.alertdetail }">
-                  {{ item.alertdetail || "无" }}</span
-                >
+                  {{ item.alertdetail || "无" }}</span>
               </div>
             </div>
           </div>

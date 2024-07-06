@@ -93,6 +93,7 @@ export const GET = async (url: string, params: Params): Promise<any> => {
     const data = await axios.get(`${baseUrl}${url}`, {
       params: params,
     });
+
     return data.data;
   } catch (error: any) {
     return Promise.reject(error.msg);

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, nextTick } from "vue";
+import { ref, reactive, nextTick, watch } from "vue";
 import { centerMap, GETNOBASE } from "@/api";
 import { registerMap, getMap } from "echarts/core";
 import { optionHandle, regionCodes } from "./center.map";
@@ -7,6 +7,11 @@ import BorderBox13 from "@/components/datav/border-box-13";
 import { ElMessage } from "element-plus";
 
 import type { MapdataType } from "./center.map";
+import { useIndexStore } from "@/stores/indexStore";
+import { storeToRefs } from 'pinia'
+
+const indexStore = useIndexStore();
+const { centerMapData } = storeToRefs(indexStore);
 
 const option = ref({});
 const code = ref("china"); //china 代表中国 其他地市是行政编码
@@ -20,6 +25,10 @@ withDefaults(
     title: "地图",
   }
 );
+
+watch(centerMapData, (newVal) => {
+  dataSetHandle(newVal.regionCode, newVal.dataList);
+})
 
 const dataSetHandle = async (regionCode: string, list: object[]) => {
   const geojson: any = await getGeojson(regionCode);
@@ -43,20 +52,6 @@ const dataSetHandle = async (regionCode: string, list: object[]) => {
   option.value = optionHandle(regionCode, list, mapData);
 };
 
-const getData = async (regionCode: string) => {
-  centerMap({ regionCode: regionCode })
-    .then((res) => {
-      console.log("中上--设备分布", res);
-      if (res.success) {
-        dataSetHandle(res.data.regionCode, res.data.dataList);
-      } else {
-        ElMessage.error(res.msg);
-      }
-    })
-    .catch((err) => {
-      ElMessage.error(err);
-    });
-};
 const getGeojson = (regionCode: string) => {
   return new Promise<boolean>(async (resolve) => {
     let mapjson = getMap(regionCode);
@@ -74,16 +69,16 @@ const getGeojson = (regionCode: string) => {
     }
   });
 };
-getData(code.value);
 
 const mapClick = (params: any) => {
   // console.log(params);
   let xzqData = regionCodes[params.name];
-  if (xzqData) {
-    getData(xzqData.adcode);
-  } else {
-    window["$message"].warning("暂无下级地市");
-  }
+  // if (xzqData) {
+  //   getData(xzqData.adcode);
+  // } else {
+  //   window["$message"].warning("暂无下级地市");
+  // }
+  window["$message"].warning("暂无下级地市");
 };
 </script>
 
@@ -97,13 +92,8 @@ const mapClick = (params: any) => {
     <div class="mapwrap">
       <BorderBox13>
         <div class="quanguo" @click="getData('china')" v-if="code !== 'china'">中国</div>
-        <v-chart
-          class="chart"
-          :option="option"
-          ref="centerMapRef"
-          @click="mapClick"
-          v-if="JSON.stringify(option) != '{}'"
-        />
+        <v-chart class="chart" :option="option" ref="centerMapRef" @click="mapClick"
+          v-if="JSON.stringify(option) != '{}'" />
       </BorderBox13>
     </div>
   </div>
