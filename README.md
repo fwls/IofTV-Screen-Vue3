@@ -1,5 +1,6 @@
 
 ## 项目描述
+结合数据源管理系统的演示版本
 
 [IofTV-Screen](https://gitee.com/daidaibg/IofTV-Screen/tree/main)  的 Vue3+vite版本，
 
